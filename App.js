@@ -1,60 +1,58 @@
 import { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  TextInput,
-  ScrollView,
-  FlatList,
-} from "react-native";
+import { StyleSheet, Text, View, FlatList, Button } from "react-native";
+import ExpenseItem from "./components/ExpenseItem";
+import ExpenseInput from "./components/ExpenseInput";
 
 export default function App() {
-  const [enteredGoalText, setEnteredGoalText] = useState("");
+  const [expense, setExpense] = useState([]);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
 
-  const [courseGoals, setCourseGoals] = useState([]);
-
-  function goalInputHandler(enteredText) {
-    setEnteredGoalText(enteredText);
+  function startAddExpenseHandler() {
+    setModalIsVisible(true);
   }
 
-  function addGoalHandler() {
-    setCourseGoals((currentCourseGoals) => [
-      ...currentCourseGoals,
-      { text: enteredGoalText, key: Math.random().toString() },
+  function stopAddExpenseHandler() {
+    setModalIsVisible(false);
+  }
+
+  function addExpenseHandler(enteredExpenseText) {
+    setExpense((currentExpenses) => [
+      ...currentExpenses,
+      { text: enteredExpenseText, id: Math.random().toString() },
     ]);
+  }
+
+  function deleteExpenseHandler(id) {
+    setExpense((currentExpenses) => {
+      return currentExpenses.filter((expense) => expense.id !== id);
+    });
+    stopAddExpenseHandler();
   }
 
   return (
     <View style={styles.appContainer}>
-      <View>
-        <Text style={styles.appTitle}>Shopping List</Text>
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Your coutse goal"
-          onChangeText={goalInputHandler}
-        />
-        <Button
-          color={"#728FCE"}
-          title="Add Expense"
-          onPress={addGoalHandler}
-        />
-      </View>
-      <View style={styles.goalsContainer}>
+      <Text style={styles.appTitle}>Shopping List</Text>
+      <Button
+        title="Add New Expense"
+        color="#4863A0"
+        onPress={startAddExpenseHandler}
+      />
+      <ExpenseInput onAddExpense={addExpenseHandler} visible={modalIsVisible} onCancel={stopAddExpenseHandler}/>
+      <View style={styles.expenseContainer}>
         <FlatList
-          data={courseGoals}
+          data={expense}
           renderItem={(itemData) => {
             return (
-              <View style={styles.goalList}>
-                <Text style={styles.goalItem}>{itemData.item.text}</Text>
-              </View>
+              <ExpenseItem
+                text={itemData.item.text}
+                id={itemData.item.id}
+                onDeleteExpense={deleteExpenseHandler}
+              />
             );
           }}
           alwaysBounceVertical={false}
-          keyExtractor={(item, index)=>{
-            return item.key;
+          keyExtractor={(item, index) => {
+            return item.id;
           }}
         />
       </View>
@@ -64,6 +62,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   appContainer: {
+    backgroundColor: '#b180f0',
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 16,
@@ -75,32 +74,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "bold",
   },
-  inputContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#cccccc",
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: "#cccccc",
-    width: "65%",
-    marginRight: 8,
-    padding: 8,
-  },
-  goalsContainer: {
+  expenseContainer: {
     flex: 5,
-  },
-  goalList: {
-    margin: 8,
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: "#4863A0",
-  },
-  goalItem: {
-    color: "white",
   },
 });
